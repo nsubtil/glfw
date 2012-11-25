@@ -170,9 +170,6 @@ void _glfwInputChar(_GLFWwindow* window, int character)
 
 void _glfwInputScroll(_GLFWwindow* window, double xoffset, double yoffset)
 {
-    window->scrollX += xoffset;
-    window->scrollY += yoffset;
-
     if (window->scrollCallback)
         window->scrollCallback(window, xoffset, yoffset);
 }
@@ -424,28 +421,6 @@ GLFWAPI void glfwSetCursorPos(GLFWwindow handle, int xpos, int ypos)
 
     // Update physical cursor position
     _glfwPlatformSetCursorPos(window, xpos, ypos);
-}
-
-
-//========================================================================
-// Returns the scroll offset for the specified window
-//========================================================================
-
-GLFWAPI void glfwGetScrollOffset(GLFWwindow handle, double* xoffset, double* yoffset)
-{
-    _GLFWwindow* window = (_GLFWwindow*) handle;
-
-    if (!_glfwInitialized)
-    {
-        _glfwSetError(GLFW_NOT_INITIALIZED, NULL);
-        return;
-    }
-
-    if (xoffset)
-      *xoffset = window->scrollX;
-
-    if (yoffset)
-      *yoffset = window->scrollY;
 }
 
 
