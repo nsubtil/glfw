@@ -527,11 +527,7 @@ GLFWAPI void glfwGetWindowSize(GLFWwindow handle, int* width, int* height)
         return;
     }
 
-    if (width != NULL)
-        *width = window->width;
-
-    if (height != NULL)
-        *height = window->height;
+    _glfwPlatformGetWindowSize(window, width, height);
 }
 
 

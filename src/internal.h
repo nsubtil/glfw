@@ -280,6 +280,7 @@ void _glfwPlatformSetTime(double time);
 int  _glfwPlatformCreateWindow(_GLFWwindow* window, const _GLFWwndconfig* wndconfig, const _GLFWfbconfig* fbconfig);
 void _glfwPlatformDestroyWindow(_GLFWwindow* window);
 void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title);
+void _glfwPlatformGetWindowSize(_GLFWwindow* window, int* width, int* height);
 void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height);
 void _glfwPlatformIconifyWindow(_GLFWwindow* window);
 void _glfwPlatformRestoreWindow(_GLFWwindow* window);

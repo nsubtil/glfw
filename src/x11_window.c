@@ -964,6 +964,25 @@ void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)
 
 
 //========================================================================
+// Get the window size
+//========================================================================
+
+void _glfwPlatformGetWindowSize(_GLFWwindow* window, int* width, int* height)
+{
+    XWindowAttributes attribs;
+
+    XGetWindowAttributes(_glfwLibrary.X11.display,
+                         window->X11.handle,
+                         &attribs);
+
+    if (width)
+        *width = attribs.width;
+    if (height)
+        *height = attribs.height;
+}
+
+
+//========================================================================
 // Set the window size
 //========================================================================
 

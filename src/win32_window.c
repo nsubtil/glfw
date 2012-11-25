@@ -1020,6 +1020,23 @@ void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)
 
 
 //========================================================================
+// Get the window size
+//========================================================================
+
+void _glfwPlatformGetWindowSize(_GLFWwindow* window, int* width, int* height)
+{
+    RECT area;
+
+    GetClientRect(window->Win32.handle, &area);
+
+    if (width)
+        *width = area.right;
+    if (height)
+        *height = area.bottom;
+}
+
+
+//========================================================================
 // Set the window size.
 //========================================================================
 

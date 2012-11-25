@@ -996,6 +996,22 @@ void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char *title)
 
 
 //========================================================================
+// Get the window size
+//========================================================================
+
+void _glfwPlatformGetWindowSize(_GLFWwindow* window, int* width, int* height)
+{
+    NSRect contentRect =
+        [window->NS.object contentRectForFrameRect:[window->NS.object frame]];
+
+    if (width)
+        *width = contentRect.size.width;
+    if (height)
+        *height = contentRect.size.height;
+}
+
+
+//========================================================================
 // Set the window size
 //========================================================================
 
