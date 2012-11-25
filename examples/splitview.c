@@ -475,9 +475,6 @@ int main(void)
     glfwGetWindowSize(window, &width, &height);
     windowSizeFun(window, width, height);
 
-    // Enable sticky keys
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
     // Enable mouse cursor (only needed for fullscreen mode)
     glfwSetInputMode(window, GLFW_CURSOR_MODE, GLFW_CURSOR_NORMAL);
 

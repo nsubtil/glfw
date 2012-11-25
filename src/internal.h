@@ -33,14 +33,6 @@
 
 
 //========================================================================
-// Input handling definitions
-//========================================================================
-
-// Internal key and button state/action definitions
-#define GLFW_STICK 2
-
-
-//========================================================================
 // Internal type declarations
 //========================================================================
 
@@ -183,8 +175,6 @@ struct _GLFWwindow
     void*     userPointer;
 
     // Window input state
-    GLboolean stickyKeys;
-    GLboolean stickyMouseButtons;
     int       cursorPosX, cursorPosY;
     int       cursorMode;
     char      mouseButton[GLFW_MOUSE_BUTTON_LAST + 1];

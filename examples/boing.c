@@ -595,7 +595,6 @@ int main( void )
    glfwGetWindowSize(window, &width, &height);
    reshape(window, width, height);
 
-   glfwSetInputMode( window, GLFW_STICKY_KEYS, GL_TRUE );
    glfwSetTime( 0.0 );
 
    init();

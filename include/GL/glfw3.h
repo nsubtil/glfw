@@ -597,14 +597,6 @@ extern "C" {
  *  @ingroup input
  */
 #define GLFW_CURSOR_MODE          0x00030001
-/*! @brief Whether the @ref glfwGetKey function uses sticky state.
- *  @ingroup input
- */
-#define GLFW_STICKY_KEYS          0x00030002
-/*! @brief Whether the @ref glfwGetMouseButton function uses sticky state.
- *  @ingroup input
- */
-#define GLFW_STICKY_MOUSE_BUTTONS 0x00030003
 /*! @} */
 
 /*! @name Cursor modes
@@ -1336,8 +1328,6 @@ GLFWAPI void glfwWaitEvents(void);
  *  @param[in] window The window to query.
  *  @param[in] mode One of the following:
  *  @arg @ref GLFW_CURSOR_MODE Sets the cursor mode.
- *  @arg @ref GLFW_STICKY_KEYS Sets whether sticky keys are enabled.
- *  @arg @ref GLFW_STICKY_MOUSE_BUTTONS Sets whether sticky mouse buttons are enabled.
  *  @ingroup input
  *
  *  @sa glfwSetInputMode
@@ -1347,8 +1337,6 @@ GLFWAPI int glfwGetInputMode(GLFWwindow window, int mode);
 /*! @brief Sets an input option for the specified window.
  *  @param[in] mode One of the following:
  *  @arg @ref GLFW_CURSOR_MODE Sets the cursor mode.
- *  @arg @ref GLFW_STICKY_KEYS Sets whether sticky keys are enabled.
- *  @arg @ref GLFW_STICKY_MOUSE_BUTTONS Sets whether sticky mouse buttons are enabled.
  *  @ingroup input
  *
  *  @sa glfwGetInputMode
