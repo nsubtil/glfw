@@ -814,7 +814,23 @@ typedef void (* GLFWkeyfun)(GLFWwindow,int,int);
  *  @ingroup input
  */
 typedef void (* GLFWcharfun)(GLFWwindow,int);
+
+/*! @brief The function signature for touch begin/end callbacks.
+ *  @param[in] window The window that received the event.
+ *  @param[in] touch The ID of the touch.
+ *  @param[in] action @ref GLFW_PRESS if the touch begun, or @c GLFW_RELEASE if
+ *  the touch ended.
+ */
 typedef void (* GLFWtouchfun)(GLFWwindow,int,int);
+
+/*! @brief The function signature for touch position callbacks.
+ *  @param[in] window The window that received the event.
+ *  @param[in] touch The ID of the touch.
+ *  @param[in] x The new x-coordinate of the touch, relative to the left edge of
+ *  the client area of the window.
+ *  @param[in] y The new y-coordinate of the touch., relative to the top edge of
+ *  the client area of the window.
+ */
 typedef void (* GLFWtouchposfun)(GLFWwindow,int,double,double);
 
 /* @brief Video mode type.
@@ -1463,11 +1479,19 @@ GLFWAPI void glfwSetCursorPos(GLFWwindow window, int xpos, int ypos);
  */
 GLFWAPI void glfwGetScrollOffset(GLFWwindow window, double* xoffset, double* yoffset);
 
-/*! @ingroup input
+/*! @brief Sets the touch begin/end callback.
+ *  @param[in] window The window whose callback to set.
+ *  @param[in] cbfun The new callback, or @c NULL to remove the currently set
+ *  callback.
+ *  @ingroup input
  */
 GLFWAPI void glfwSetTouchCallback(GLFWwindow window, GLFWtouchfun cbfun);
 
-/*! @ingroup input
+/*! @brief Sets the touch position callback.
+ *  @param[in] window The window whose callback to set.
+ *  @param[in] cbfun The new callback, or @c NULL to remove the currently set
+ *  callback.
+ *  @ingroup input
  */
 GLFWAPI void glfwSetTouchPosCallback(GLFWwindow window, GLFWtouchposfun cbfun);
 
