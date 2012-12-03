@@ -93,7 +93,7 @@ static _GLFWfbconfig* getFBConfigs(_GLFWwindow* window, unsigned int* found)
     {
         if (!_glfwLibrary.GLX.SGIX_fbconfig)
         {
-            _glfwSetError(GLFW_OPENGL_UNAVAILABLE,
+            _glfwSetError(GLFW_API_UNAVAILABLE,
                           "GLX: GLXFBConfig support not found");
             return NULL;
         }
@@ -103,8 +103,8 @@ static _GLFWfbconfig* getFBConfigs(_GLFWwindow* window, unsigned int* found)
 
     if (strcmp(vendor, "Chromium") == 0)
     {
-        // This is a (hopefully temporary) workaround for Chromium (VirtualBox
-        // GL) not setting the window bit on any GLXFBConfigs
+        // HACK: This is a (hopefully temporary) workaround for Chromium
+        // (VirtualBox GL) not setting the window bit on any GLXFBConfigs
         trustWindowBit = GL_FALSE;
     }
 
@@ -116,7 +116,7 @@ static _GLFWfbconfig* getFBConfigs(_GLFWwindow* window, unsigned int* found)
                                                         &count);
         if (!count)
         {
-            _glfwSetError(GLFW_OPENGL_UNAVAILABLE,
+            _glfwSetError(GLFW_API_UNAVAILABLE,
                           "GLX: No GLXFBConfigs returned");
             return NULL;
         }
@@ -128,7 +128,7 @@ static _GLFWfbconfig* getFBConfigs(_GLFWwindow* window, unsigned int* found)
                                     &count);
         if (!count)
         {
-            _glfwSetError(GLFW_OPENGL_UNAVAILABLE,
+            _glfwSetError(GLFW_API_UNAVAILABLE,
                           "GLX: No GLXFBConfigs returned");
             return NULL;
         }
@@ -189,6 +189,11 @@ static _GLFWfbconfig* getFBConfigs(_GLFWwindow* window, unsigned int* found)
             f->samples = getFBConfigAttrib(window, fbconfigs[i], GLX_SAMPLES);
         else
             f->samples = 0;
+
+        if (_glfwLibrary.GLX.ARB_framebuffer_sRGB)
+            f->sRGB = getFBConfigAttrib(window, fbconfigs[i], GLX_FRAMEBUFFER_SRGB_CAPABLE_ARB);
+        else
+            f->sRGB = GL_FALSE;
 
         f->platformID = (GLFWintptr) getFBConfigAttrib(window, fbconfigs[i], GLX_FBCONFIG_ID);
 
@@ -295,6 +300,22 @@ static int createContext(_GLFWwindow* window,
             setGLXattrib(attribs, index, GLX_CONTEXT_MINOR_VERSION_ARB, wndconfig->glMinor);
         }
 
+        if (wndconfig->clientAPI == GLFW_OPENGL_ES_API)
+        {
+            if (!_glfwLibrary.GLX.ARB_create_context_profile ||
+                !_glfwLibrary.GLX.EXT_create_context_es2_profile)
+            {
+                _glfwSetError(GLFW_VERSION_UNAVAILABLE,
+                              "GLX: OpenGL ES 2.x requested but "
+                              "GLX_EXT_create_context_es2_profile is unavailable");
+                return GL_FALSE;
+            }
+
+            setGLXattrib(attribs, index,
+                         GLX_CONTEXT_PROFILE_MASK_ARB,
+                         GLX_CONTEXT_ES2_PROFILE_BIT_EXT);
+        }
+
         if (wndconfig->glForward || wndconfig->glDebug || wndconfig->glRobustness)
         {
             int flags = 0;
@@ -323,21 +344,10 @@ static int createContext(_GLFWwindow* window,
                 return GL_FALSE;
             }
 
-            if (wndconfig->glProfile == GLFW_OPENGL_ES2_PROFILE &&
-                !_glfwLibrary.GLX.EXT_create_context_es2_profile)
-            {
-                _glfwSetError(GLFW_VERSION_UNAVAILABLE,
-                              "GLX: OpenGL ES 2.x profile requested but "
-                              "GLX_EXT_create_context_es2_profile is unavailable");
-                return GL_FALSE;
-            }
-
             if (wndconfig->glProfile == GLFW_OPENGL_CORE_PROFILE)
                 flags = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
             else if (wndconfig->glProfile == GLFW_OPENGL_COMPAT_PROFILE)
                 flags = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
-            else if (wndconfig->glProfile == GLFW_OPENGL_ES2_PROFILE)
-                flags = GLX_CONTEXT_ES2_PROFILE_BIT_EXT;
 
             setGLXattrib(attribs, index, GLX_CONTEXT_PROFILE_MASK_ARB, flags);
         }
@@ -460,7 +470,7 @@ int _glfwInitOpenGL(void)
     // Check if GLX is supported on this display
     if (!glXQueryExtension(_glfwLibrary.X11.display, NULL, NULL))
     {
-        _glfwSetError(GLFW_OPENGL_UNAVAILABLE, "GLX: GLX support not found");
+        _glfwSetError(GLFW_API_UNAVAILABLE, "GLX: GLX support not found");
         return GL_FALSE;
     }
 
@@ -468,8 +478,7 @@ int _glfwInitOpenGL(void)
                          &_glfwLibrary.GLX.majorVersion,
                          &_glfwLibrary.GLX.minorVersion))
     {
-        _glfwSetError(GLFW_OPENGL_UNAVAILABLE,
-                      "GLX: Failed to query GLX version");
+        _glfwSetError(GLFW_API_UNAVAILABLE, "GLX: Failed to query GLX version");
         return GL_FALSE;
     }
 
@@ -522,6 +531,9 @@ int _glfwInitOpenGL(void)
 
     if (_glfwPlatformExtensionSupported("GLX_ARB_multisample"))
         _glfwLibrary.GLX.ARB_multisample = GL_TRUE;
+
+    if (_glfwPlatformExtensionSupported("GLX_ARB_framebuffer_sRGB"))
+        _glfwLibrary.GLX.ARB_framebuffer_sRGB = GL_TRUE;
 
     if (_glfwPlatformExtensionSupported("GLX_ARB_create_context"))
     {
@@ -614,21 +626,9 @@ void _glfwDestroyContext(_GLFWwindow* window)
 
     if (window->GLX.context)
     {
-        // Release and destroy the context
-        glXMakeCurrent(_glfwLibrary.X11.display, None, NULL);
         glXDestroyContext(_glfwLibrary.X11.display, window->GLX.context);
         window->GLX.context = NULL;
     }
-}
-
-
-//========================================================================
-// Return the X visual associated with the specified context
-//========================================================================
-
-XVisualInfo* _glfwGetContextVisual(_GLFWwindow* window)
-{
-    return window->GLX.visual;
 }
 
 
@@ -727,18 +727,5 @@ int _glfwPlatformExtensionSupported(const char* extension)
 GLFWglproc _glfwPlatformGetProcAddress(const char* procname)
 {
     return _glfw_glXGetProcAddress((const GLubyte*) procname);
-}
-
-
-//========================================================================
-// Copies the specified OpenGL state categories from src to dst
-//========================================================================
-
-void _glfwPlatformCopyContext(_GLFWwindow* src, _GLFWwindow* dst, unsigned long mask)
-{
-    glXCopyContext(_glfwLibrary.X11.display,
-                   src->GLX.context,
-                   dst->GLX.context,
-                   mask);
 }
 

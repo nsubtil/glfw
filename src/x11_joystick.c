@@ -30,7 +30,7 @@
 
 #include "internal.h"
 
-#ifdef _GLFW_HAS_LINUX_JOYSTICKS
+#ifdef __linux__
 #include <linux/joystick.h>
 
 #include <sys/types.h>
@@ -41,7 +41,8 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#endif // _GLFW_HAS_LINUX_JOYSTICKS
+#include <string.h>
+#endif // __linux__
 
 
 //========================================================================
@@ -50,8 +51,9 @@
 
 static int openJoystickDevice(int joy, const char* path)
 {
-#ifdef _GLFW_HAS_LINUX_JOYSTICKS
+#ifdef __linux__
     char numAxes, numButtons;
+    char name[256];
     int fd, version;
 
     fd = open(path, O_RDONLY | O_NONBLOCK);
@@ -68,6 +70,11 @@ static int openJoystickDevice(int joy, const char* path)
         close(fd);
         return GL_FALSE;
     }
+
+    if (ioctl(fd, JSIOCGNAME(sizeof(name)), name) < 0)
+        strncpy(name, "Unknown", sizeof(name));
+
+    _glfwLibrary.X11.joystick[joy].name = strdup(name);
 
     ioctl(fd, JSIOCGAXES, &numAxes);
     _glfwLibrary.X11.joystick[joy].numAxes = (int) numAxes;
@@ -97,7 +104,7 @@ static int openJoystickDevice(int joy, const char* path)
     }
 
     _glfwLibrary.X11.joystick[joy].present = GL_TRUE;
-#endif // _GLFW_HAS_LINUX_JOYSTICKS
+#endif // __linux__
 
     return GL_TRUE;
 }
@@ -109,7 +116,7 @@ static int openJoystickDevice(int joy, const char* path)
 
 static void pollJoystickEvents(void)
 {
-#ifdef _GLFW_HAS_LINUX_JOYSTICKS
+#ifdef __linux__
     int i;
     ssize_t result;
     struct js_event e;
@@ -160,7 +167,7 @@ static void pollJoystickEvents(void)
             }
         }
     }
-#endif // _GLFW_HAS_LINUX_JOYSTICKS
+#endif // __linux__
 }
 
 
@@ -174,7 +181,7 @@ static void pollJoystickEvents(void)
 
 int _glfwInitJoysticks(void)
 {
-#ifdef _GLFW_HAS_LINUX_JOYSTICKS
+#ifdef __linux__
     int i, joy = 0;
     regex_t regex;
     DIR* dir;
@@ -215,7 +222,7 @@ int _glfwInitJoysticks(void)
     }
 
     regfree(&regex);
-#endif // _GLFW_HAS_LINUX_JOYSTICKS
+#endif // __linux__
 
     return GL_TRUE;
 }
@@ -227,7 +234,7 @@ int _glfwInitJoysticks(void)
 
 void _glfwTerminateJoysticks(void)
 {
-#ifdef _GLFW_HAS_LINUX_JOYSTICKS
+#ifdef __linux__
     int i;
 
     for (i = 0;  i <= GLFW_JOYSTICK_LAST;  i++)
@@ -237,11 +244,12 @@ void _glfwTerminateJoysticks(void)
             close(_glfwLibrary.X11.joystick[i].fd);
             free(_glfwLibrary.X11.joystick[i].axis);
             free(_glfwLibrary.X11.joystick[i].button);
+            free(_glfwLibrary.X11.joystick[i].name);
 
             _glfwLibrary.X11.joystick[i].present = GL_FALSE;
         }
     }
-#endif // _GLFW_HAS_LINUX_JOYSTICKS
+#endif // __linux__
 }
 
 
@@ -323,5 +331,18 @@ int _glfwPlatformGetJoystickButtons(int joy, unsigned char* buttons,
         buttons[i] = _glfwLibrary.X11.joystick[joy].button[i];
 
     return numButtons;
+}
+
+
+//========================================================================
+// Get joystick name
+//========================================================================
+
+const char* _glfwPlatformGetJoystickName(int joy)
+{
+    if (!_glfwLibrary.X11.joystick[joy].present)
+        return NULL;
+
+    return _glfwLibrary.X11.joystick[joy].name;
 }
 

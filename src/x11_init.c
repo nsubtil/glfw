@@ -491,7 +491,7 @@ static GLboolean initDisplay(void)
     _glfwLibrary.X11.display = XOpenDisplay(NULL);
     if (!_glfwLibrary.X11.display)
     {
-        _glfwSetError(GLFW_OPENGL_UNAVAILABLE, "X11: Failed to open X display");
+        _glfwSetError(GLFW_API_UNAVAILABLE, "X11: Failed to open X display");
         return GL_FALSE;
     }
 
@@ -693,6 +693,11 @@ int _glfwPlatformTerminate(void)
 const char* _glfwPlatformGetVersionString(void)
 {
     const char* version = _GLFW_VERSION_FULL
+#if defined(_GLFW_GLX)
+        " GLX"
+#elif defined(_GLFW_EGL)
+        " EGL"
+#endif
 #if defined(_GLFW_HAS_XRANDR)
         " XRandR"
 #endif
@@ -711,15 +716,19 @@ const char* _glfwPlatformGetVersionString(void)
         " glXGetProcAddressARB"
 #elif defined(_GLFW_HAS_GLXGETPROCADDRESSEXT)
         " glXGetProcAddressEXT"
+#elif defined(_GLFW_HAS_EGLGETPROCADDRESS)
+        " eglGetProcAddress"
 #elif defined(_GLFW_DLOPEN_LIBGL)
         " dlsym(libGL)"
+#elif defined(_GLFW_DLOPEN_LIBEGL)
+        " dlsym(libEGL)"
 #else
         " no-extension-support"
 #endif
 #if defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
         " clock_gettime"
 #endif
-#if defined(_GLFW_HAS_LINUX_JOYSTICKS)
+#if defined(__linux__)
         " Linux-joystick-API"
 #else
         " no-joystick-support"

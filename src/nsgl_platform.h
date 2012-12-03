@@ -1,6 +1,6 @@
 //========================================================================
 // GLFW - An OpenGL library
-// Platform:    Cocoa
+// Platform:    NSOpenGL
 // API Version: 3.0
 // WWW:         http://www.glfw.org/
 //------------------------------------------------------------------------
@@ -27,36 +27,36 @@
 //
 //========================================================================
 
-#include "internal.h"
+#ifndef _nsgl_platform_h_
+#define _nsgl_platform_h_
 
 
-//////////////////////////////////////////////////////////////////////////
-//////                       GLFW platform API                      //////
-//////////////////////////////////////////////////////////////////////////
+#define _GLFW_PLATFORM_CONTEXT_STATE        _GLFWcontextNSGL NSGL
+#define _GLFW_PLATFORM_LIBRARY_OPENGL_STATE _GLFWlibraryNSGL NSGL
+
 
 //========================================================================
-// Enable and disable system keys
+// GLFW platform specific types
 //========================================================================
 
-void _glfwPlatformEnableSystemKeys(_GLFWwindow* window)
+//------------------------------------------------------------------------
+// Platform-specific OpenGL context structure
+//------------------------------------------------------------------------
+typedef struct _GLFWcontextNSGL
 {
-    // This is checked in cocoa_window.m; no action needed here
-}
+    id           pixelFormat;
+    id	         context;
+} _GLFWcontextNSGL;
 
-void _glfwPlatformDisableSystemKeys(_GLFWwindow* window)
+
+//------------------------------------------------------------------------
+// Platform-specific library global data for NSGL
+//------------------------------------------------------------------------
+typedef struct _GLFWlibraryNSGL
 {
-    // This is checked in cocoa_window.m; no action needed here
-
-    // Note that it may not be possible to disable things like Exposé
-    // except in full-screen mode.
-}
+    // dlopen handle for dynamically loading OpenGL extension entry points
+    void*            framework;
+} _GLFWlibraryNSGL;
 
 
-//========================================================================
-// Set whether touch input is enabled for the specified window
-//========================================================================
-
-void _glfwPlatformSetTouchInput(_GLFWwindow* window, int enabled)
-{
-}
-
+#endif // _nsgl_platform_h_

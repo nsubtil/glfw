@@ -37,33 +37,26 @@
 #define HEIGHT 400
 
 static GLFWwindow windows[2];
+static GLboolean closed = GL_FALSE;
 
 static void key_callback(GLFWwindow window, int key, int action)
 {
     if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE)
-        glfwDestroyWindow(window);
+        closed = GL_TRUE;
 }
 
 static int window_close_callback(GLFWwindow window)
 {
-    int i;
-
-    for (i = 0;  i < 2;  i++)
-    {
-        if (windows[i] == window)
-        {
-            windows[i] = NULL;
-            break;
-        }
-    }
-
-    return GL_TRUE;
+    closed = GL_TRUE;
+    return GL_FALSE;
 }
 
-static GLFWwindow open_window(const char* title, GLFWwindow share)
+static GLFWwindow open_window(const char* title, GLFWwindow share, int posX, int posY)
 {
     GLFWwindow window;
 
+    glfwWindowHint(GLFW_POSITION_X, posX);
+    glfwWindowHint(GLFW_POSITION_Y, posY);
     window = glfwCreateWindow(WIDTH, HEIGHT, GLFW_WINDOWED, title, share);
     if (!window)
         return NULL;
@@ -71,8 +64,8 @@ static GLFWwindow open_window(const char* title, GLFWwindow share)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    glfwSetWindowCloseCallback(window_close_callback);
-    glfwSetKeyCallback(key_callback);
+    glfwSetWindowCloseCallback(window, window_close_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     return window;
 }
@@ -134,7 +127,6 @@ static void draw_quad(GLuint texture)
 int main(int argc, char** argv)
 {
     GLuint texture;
-    int x, y;
 
     if (!glfwInit())
     {
@@ -142,10 +134,12 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    windows[0] = open_window("First", NULL);
+    windows[0] = open_window("First", NULL, 0, 0);
     if (!windows[0])
     {
         fprintf(stderr, "Failed to open first GLFW window: %s\n", glfwErrorString(glfwGetError()));
+
+        glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
@@ -154,23 +148,25 @@ int main(int argc, char** argv)
     // It will then be shared with the second context, created below
     texture = create_texture();
 
-    windows[1] = open_window("Second", windows[0]);
+    // Put the second window to the right of the first one
+    windows[1] = open_window("Second", windows[0], WIDTH + 50, 0);
     if (!windows[1])
     {
         fprintf(stderr, "Failed to open second GLFW window: %s\n", glfwErrorString(glfwGetError()));
+
+        glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    // Set drawing color for the first context and copy it to the second
+    // Set drawing color for both contexts
     glfwMakeContextCurrent(windows[0]);
     glColor3f(0.6f, 0.f, 0.6f);
-    glfwCopyContext(windows[0], windows[1], GL_CURRENT_BIT);
+    glfwMakeContextCurrent(windows[1]);
+    glColor3f(0.6f, 0.6f, 0.f);
 
-    // Put the second window to the right of the first one
-    glfwGetWindowPos(windows[0], &x, &y);
-    glfwSetWindowPos(windows[1], x + WIDTH + 50, y);
+    glfwMakeContextCurrent(windows[0]);
 
-    while (windows[0] && windows[1])
+    while (!closed)
     {
         glfwMakeContextCurrent(windows[0]);
         draw_quad(texture);

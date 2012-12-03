@@ -65,14 +65,14 @@ typedef struct _GLFWlibrary     _GLFWlibrary;
 // extensions and not all operating systems come with an up-to-date version
 #include "../support/GL/glext.h"
 
-#if defined(_GLFW_COCOA_NSGL)
+#if defined(_GLFW_COCOA)
  #include "cocoa_platform.h"
-#elif defined(_GLFW_WIN32_WGL)
+#elif defined(_GLFW_WIN32)
  #include "win32_platform.h"
-#elif defined(_GLFW_X11_GLX)
+#elif defined(_GLFW_X11)
  #include "x11_platform.h"
 #else
- #error "No supported platform selected"
+ #error "No supported window creation API selected"
 #endif
 
 
@@ -100,12 +100,16 @@ struct _GLFWhints
     GLboolean   resizable;
     GLboolean   visible;
     int         samples;
+    GLboolean   sRGB;
+    int         clientAPI;
     int         glMajor;
     int         glMinor;
     GLboolean   glForward;
     GLboolean   glDebug;
     int         glProfile;
     int         glRobustness;
+    int         positionX;
+    int         positionY;
 };
 
 
@@ -122,6 +126,9 @@ struct _GLFWwndconfig
     int           refreshRate;
     GLboolean     resizable;
     GLboolean     visible;
+    int           positionX;
+    int           positionY;
+    int           clientAPI;
     int           glMajor;
     int           glMinor;
     GLboolean     glForward;
@@ -154,6 +161,7 @@ struct _GLFWfbconfig
     int         auxBuffers;
     GLboolean   stereo;
     int         samples;
+    GLboolean   sRGB;
     GLFWintptr  platformID;
 };
 
@@ -170,7 +178,7 @@ struct _GLFWwindow
     GLboolean closeRequested;  // GL_TRUE if this window should be closed
     int       width, height;
     int       positionX, positionY;
-    int       mode;            // GLFW_WINDOW or GLFW_FULLSCREEN
+    int       mode;            // GLFW_WINDOWED or GLFW_FULLSCREEN
     GLboolean resizable;       // GL_TRUE if user may resize this window
     GLboolean visible;         // GL_TRUE if this window is visible
     int       refreshRate;     // monitor refresh rate
@@ -179,8 +187,6 @@ struct _GLFWwindow
     // Window input state
     GLboolean stickyKeys;
     GLboolean stickyMouseButtons;
-    GLboolean keyRepeat;
-    GLboolean systemKeys;      // system keys enabled flag
     GLboolean touchInput;      // GL_TRUE if this window receives touch input
     int       cursorPosX, cursorPosY;
     int       cursorMode;
@@ -189,11 +195,27 @@ struct _GLFWwindow
     char      key[GLFW_KEY_LAST + 1];
 
     // OpenGL extensions and context attributes
+    int       clientAPI;
     int       glMajor, glMinor, glRevision;
     GLboolean glForward, glDebug;
     int       glProfile;
     int       glRobustness;
     PFNGLGETSTRINGIPROC GetStringi;
+
+    GLFWwindowposfun     windowPosCallback;
+    GLFWwindowsizefun    windowSizeCallback;
+    GLFWwindowclosefun   windowCloseCallback;
+    GLFWwindowrefreshfun windowRefreshCallback;
+    GLFWwindowfocusfun   windowFocusCallback;
+    GLFWwindowiconifyfun windowIconifyCallback;
+    GLFWmousebuttonfun   mouseButtonCallback;
+    GLFWcursorposfun     cursorPosCallback;
+    GLFWcursorenterfun   cursorEnterCallback;
+    GLFWscrollfun        scrollCallback;
+    GLFWkeyfun           keyCallback;
+    GLFWcharfun          charCallback;
+    GLFWtouchfun         touchCallback;
+    GLFWtouchposfun      touchPosCallback;
 
     // These are defined in the current port's platform.h
     _GLFW_PLATFORM_WINDOW_STATE;
@@ -209,21 +231,7 @@ struct _GLFWlibrary
     _GLFWhints    hints;
 
     _GLFWwindow*  windowListHead;
-    _GLFWwindow*  activeWindow;
-
-    GLFWwindowsizefun    windowSizeCallback;
-    GLFWwindowclosefun   windowCloseCallback;
-    GLFWwindowrefreshfun windowRefreshCallback;
-    GLFWwindowfocusfun   windowFocusCallback;
-    GLFWwindowiconifyfun windowIconifyCallback;
-    GLFWmousebuttonfun   mouseButtonCallback;
-    GLFWcursorposfun     cursorPosCallback;
-    GLFWcursorenterfun   cursorEnterCallback;
-    GLFWscrollfun        scrollCallback;
-    GLFWkeyfun           keyCallback;
-    GLFWcharfun          charCallback;
-    GLFWtouchfun         touchCallback;
-    GLFWtouchposfun      touchPosCallback;
+    _GLFWwindow*  focusedWindow;
 
     GLFWgammaramp currentRamp;
     GLFWgammaramp originalRamp;
@@ -281,6 +289,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window);
 int _glfwPlatformGetJoystickParam(int joy, int param);
 int _glfwPlatformGetJoystickAxes(int joy, float* axes, int numaxes);
 int _glfwPlatformGetJoystickButtons(int joy, unsigned char* buttons, int numbuttons);
+const char* _glfwPlatformGetJoystickName(int joy);
 
 // Time input
 double _glfwPlatformGetTime(void);
@@ -291,7 +300,6 @@ int  _glfwPlatformCreateWindow(_GLFWwindow* window, const _GLFWwndconfig* wndcon
 void _glfwPlatformDestroyWindow(_GLFWwindow* window);
 void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title);
 void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height);
-void _glfwPlatformSetWindowPos(_GLFWwindow* window, int x, int y);
 void _glfwPlatformIconifyWindow(_GLFWwindow* window);
 void _glfwPlatformRestoreWindow(_GLFWwindow* window);
 void _glfwPlatformShowWindow(_GLFWwindow* window);
@@ -309,7 +317,6 @@ void _glfwPlatformSwapInterval(int interval);
 void _glfwPlatformRefreshWindowParams(_GLFWwindow* window);
 int  _glfwPlatformExtensionSupported(const char* extension);
 GLFWglproc _glfwPlatformGetProcAddress(const char* procname);
-void _glfwPlatformCopyContext(_GLFWwindow* src, _GLFWwindow* dst, unsigned long mask);
 
 
 //========================================================================
@@ -320,7 +327,7 @@ void _glfwPlatformCopyContext(_GLFWwindow* src, _GLFWwindow* dst, unsigned long 
 //========================================================================
 
 // Window event notification (window.c)
-void _glfwInputWindowFocus(_GLFWwindow* window, GLboolean activated);
+void _glfwInputWindowFocus(_GLFWwindow* window, GLboolean focused);
 void _glfwInputWindowPos(_GLFWwindow* window, int x, int y);
 void _glfwInputWindowSize(_GLFWwindow* window, int width, int height);
 void _glfwInputWindowIconify(_GLFWwindow* window, int iconified);
@@ -352,9 +359,6 @@ void _glfwSplitBPP(int bpp, int* red, int* green, int* blue);
 
 // Error handling (init.c)
 void _glfwSetError(int error, const char* format, ...);
-
-// Window management (window.c)
-void _glfwSetDefaultWindowHints(void);
 
 // OpenGL context helpers (opengl.c)
 int _glfwStringInExtensionString(const char* string, const GLubyte* extensions);

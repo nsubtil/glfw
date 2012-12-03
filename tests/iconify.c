@@ -35,9 +35,17 @@
 
 #include "getopt.h"
 
+static GLboolean closed = GL_FALSE;
+
 static void usage(void)
 {
     printf("Usage: iconify [-h] [-f]\n");
+}
+
+static int window_close_callback(GLFWwindow window)
+{
+    closed = GL_TRUE;
+    return GL_FALSE;
 }
 
 static void key_callback(GLFWwindow window, int key, int action)
@@ -55,23 +63,36 @@ static void key_callback(GLFWwindow window, int key, int action)
             glfwIconifyWindow(window);
             break;
         case GLFW_KEY_ESCAPE:
-            glfwDestroyWindow(window);
+            closed = GL_TRUE;
             break;
     }
 }
 
-static void size_callback(GLFWwindow window, int width, int height)
+static void window_size_callback(GLFWwindow window, int width, int height)
 {
-    printf("%0.2f Size %ix%i\n", glfwGetTime(), width, height);
+    printf("%0.2f Window resized to %ix%i\n", glfwGetTime(), width, height);
 
     glViewport(0, 0, width, height);
+}
+
+static void window_focus_callback(GLFWwindow window, int focused)
+{
+    printf("%0.2f Window %s\n",
+           glfwGetTime(),
+           focused ? "focused" : "defocused");
+}
+
+static void window_iconify_callback(GLFWwindow window, int iconified)
+{
+    printf("%0.2f Window %s\n",
+           glfwGetTime(),
+           iconified ? "iconified" : "restored");
 }
 
 int main(int argc, char** argv)
 {
     int width, height, ch;
     int mode = GLFW_WINDOWED;
-    GLboolean active = -1, iconified = -1;
     GLFWwindow window;
 
     while ((ch = getopt(argc, argv, "fh")) != -1)
@@ -107,8 +128,8 @@ int main(int argc, char** argv)
     }
     else
     {
-        width = 0;
-        height = 0;
+        width = 640;
+        height = 480;
     }
 
     window = glfwCreateWindow(width, height, mode, "Iconify", NULL);
@@ -123,25 +144,20 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    glfwSetKeyCallback(key_callback);
-    glfwSetWindowSizeCallback(size_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetWindowSizeCallback(window, window_size_callback);
+    glfwSetWindowCloseCallback(window, window_close_callback);
+    glfwSetWindowFocusCallback(window, window_focus_callback);
+    glfwSetWindowIconifyCallback(window, window_iconify_callback);
+
+    printf("Window is %s and %s\n",
+           glfwGetWindowParam(window, GLFW_ICONIFIED) ? "iconified" : "restored",
+           glfwGetWindowParam(window, GLFW_FOCUSED) ? "focused" : "defocused");
 
     glEnable(GL_SCISSOR_TEST);
 
-    while (!glfwGetWindowParam(window, GLFW_CLOSE_REQUESTED))
+    while (!closed)
     {
-        if (iconified != glfwGetWindowParam(window, GLFW_ICONIFIED) ||
-            active != glfwGetWindowParam(window, GLFW_ACTIVE))
-        {
-            iconified = glfwGetWindowParam(window, GLFW_ICONIFIED);
-            active = glfwGetWindowParam(window, GLFW_ACTIVE);
-
-            printf("%0.2f %s %s\n",
-                   glfwGetTime(),
-                   iconified ? "Iconified" : "Restored",
-                   active ? "Active" : "Inactive");
-        }
-
         glfwGetWindowSize(window, &width, &height);
 
         glScissor(0, 0, width, height);

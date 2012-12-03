@@ -35,7 +35,7 @@
 
 #include "getopt.h"
 
-static GLFWwindow window = NULL;
+static GLFWwindow window_handle = NULL;
 
 enum Mode
 {
@@ -68,25 +68,25 @@ static void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-static void window_size_callback(GLFWwindow in_window, int width, int height)
+static void window_size_callback(GLFWwindow window, int width, int height)
 {
     printf("Window resized to %ix%i\n", width, height);
 
     glViewport(0, 0, width, height);
 }
 
-static int window_close_callback(GLFWwindow dummy)
+static int window_close_callback(GLFWwindow window)
 {
-    window = NULL;
+    window_handle = NULL;
     return GL_TRUE;
 }
 
-static void key_callback(GLFWwindow dummy, int key, int action)
+static void key_callback(GLFWwindow window, int key, int action)
 {
     if (key == GLFW_KEY_ESCAPE)
     {
         glfwDestroyWindow(window);
-        window = NULL;
+        window_handle = NULL;
     }
 }
 
@@ -117,10 +117,6 @@ static void test_modes(void)
     int i, count;
     GLFWvidmode* modes = glfwGetVideoModes(&count);
 
-    glfwSetWindowSizeCallback(window_size_callback);
-    glfwSetWindowCloseCallback(window_close_callback);
-    glfwSetKeyCallback(key_callback);
-
     for (i = 0;  i < count;  i++)
     {
         GLFWvidmode* mode = modes + i;
@@ -132,10 +128,10 @@ static void test_modes(void)
 
         printf("Testing mode %u: %s", (unsigned int) i, format_mode(mode));
 
-        window = glfwCreateWindow(mode->width, mode->height,
-                                  GLFW_FULLSCREEN, "Video Mode Test",
-                                  NULL);
-        if (!window)
+        window_handle = glfwCreateWindow(mode->width, mode->height,
+                                         GLFW_FULLSCREEN, "Video Mode Test",
+                                         NULL);
+        if (!window_handle)
         {
             printf("Failed to enter mode %u: %s\n",
                    (unsigned int) i,
@@ -143,7 +139,11 @@ static void test_modes(void)
             continue;
         }
 
-        glfwMakeContextCurrent(window);
+        glfwSetWindowSizeCallback(window_handle, window_size_callback);
+        glfwSetWindowCloseCallback(window_handle, window_close_callback);
+        glfwSetKeyCallback(window_handle, key_callback);
+
+        glfwMakeContextCurrent(window_handle);
         glfwSwapInterval(1);
 
         glfwSetTime(0.0);
@@ -151,12 +151,14 @@ static void test_modes(void)
         while (glfwGetTime() < 5.0)
         {
             glClear(GL_COLOR_BUFFER_BIT);
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(window_handle);
             glfwPollEvents();
 
-            if (!window)
+            if (!window_handle)
             {
                 printf("User terminated program\n");
+
+                glfwTerminate();
                 exit(EXIT_SUCCESS);
             }
         }
@@ -165,7 +167,7 @@ static void test_modes(void)
         glGetIntegerv(GL_GREEN_BITS, &current.greenBits);
         glGetIntegerv(GL_BLUE_BITS, &current.blueBits);
 
-        glfwGetWindowSize(window, &current.width, &current.height);
+        glfwGetWindowSize(window_handle, &current.width, &current.height);
 
         if (current.redBits != mode->redBits ||
             current.greenBits != mode->greenBits ||
@@ -185,9 +187,9 @@ static void test_modes(void)
 
         printf("Closing window\n");
 
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(window_handle);
+        window_handle = NULL;
         glfwPollEvents();
-        window = NULL;
     }
 }
 
@@ -224,6 +226,7 @@ int main(int argc, char** argv)
     else if (mode == TEST_MODE)
         test_modes();
 
+    glfwTerminate();
     exit(EXIT_SUCCESS);
 }
 
