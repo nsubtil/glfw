@@ -57,14 +57,14 @@ typedef struct _GLFWlibrary     _GLFWlibrary;
 // extensions and not all operating systems come with an up-to-date version
 #include "../support/GL/glext.h"
 
-#if defined(_GLFW_COCOA_NSGL)
+#if defined(_GLFW_COCOA)
  #include "cocoa_platform.h"
-#elif defined(_GLFW_WIN32_WGL)
+#elif defined(_GLFW_WIN32)
  #include "win32_platform.h"
-#elif defined(_GLFW_X11_GLX)
+#elif defined(_GLFW_X11)
  #include "x11_platform.h"
 #else
- #error "No supported platform selected"
+ #error "No supported window creation API selected"
 #endif
 
 
@@ -92,6 +92,7 @@ struct _GLFWhints
     GLboolean   resizable;
     GLboolean   visible;
     int         samples;
+    GLboolean   sRGB;
     int         clientAPI;
     int         glMajor;
     int         glMinor;
@@ -152,6 +153,7 @@ struct _GLFWfbconfig
     int         auxBuffers;
     GLboolean   stereo;
     int         samples;
+    GLboolean   sRGB;
     GLFWintptr  platformID;
 };
 
@@ -188,6 +190,7 @@ struct _GLFWwindow
     int       glRobustness;
     PFNGLGETSTRINGIPROC GetStringi;
 
+    GLFWwindowposfun     windowPosCallback;
     GLFWwindowsizefun    windowSizeCallback;
     GLFWwindowclosefun   windowCloseCallback;
     GLFWwindowrefreshfun windowRefreshCallback;
@@ -271,6 +274,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window);
 int _glfwPlatformGetJoystickParam(int joy, int param);
 int _glfwPlatformGetJoystickAxes(int joy, float* axes, int numaxes);
 int _glfwPlatformGetJoystickButtons(int joy, unsigned char* buttons, int numbuttons);
+const char* _glfwPlatformGetJoystickName(int joy);
 
 // Time input
 double _glfwPlatformGetTime(void);
