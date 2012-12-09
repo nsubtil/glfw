@@ -261,7 +261,7 @@ void calc_grid(void)
 // Handle key strokes
 //========================================================================
 
-void key_callback(GLFWwindow window, int key, int action)
+void key_callback(GLFWwindow window, int key, int action, int mods)
 {
     if (action != GLFW_PRESS)
         return;
@@ -304,7 +304,7 @@ void key_callback(GLFWwindow window, int key, int action)
 // Callback function for mouse button events
 //========================================================================
 
-void mouse_button_callback(GLFWwindow window, int button, int action)
+void mouse_button_callback(GLFWwindow window, int button, int action, int mods)
 {
     if (button != GLFW_MOUSE_BUTTON_LEFT)
         return;

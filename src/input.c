@@ -123,7 +123,7 @@ static void setStickyMouseButtons(_GLFWwindow* window, int enabled)
 // Register keyboard activity
 //========================================================================
 
-void _glfwInputKey(_GLFWwindow* window, int key, int action)
+void _glfwInputKey(_GLFWwindow* window, int key, int action, int mods)
 {
     GLboolean repeated = GL_FALSE;
 
@@ -145,7 +145,7 @@ void _glfwInputKey(_GLFWwindow* window, int key, int action)
 
     // Call user callback function
     if (window->keyCallback && !repeated)
-        window->keyCallback(window, key, action);
+        window->keyCallback(window, key, action, mods);
 }
 
 
@@ -182,7 +182,7 @@ void _glfwInputScroll(_GLFWwindow* window, double xoffset, double yoffset)
 // Register mouse button clicks
 //========================================================================
 
-void _glfwInputMouseClick(_GLFWwindow* window, int button, int action)
+void _glfwInputMouseClick(_GLFWwindow* window, int button, int action, int mods)
 {
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
         return;
@@ -194,7 +194,7 @@ void _glfwInputMouseClick(_GLFWwindow* window, int button, int action)
         window->mouseButton[button] = (char) action;
 
     if (window->mouseButtonCallback)
-        window->mouseButtonCallback(window, button, action);
+        window->mouseButtonCallback(window, button, action, mods);
 }
 
 
