@@ -83,6 +83,25 @@ static void showCursor(_GLFWwindow* window)
 
 
 //========================================================================
+// Retrieves and translates modifier keys
+//========================================================================
+
+static int getKeyMods(void)
+{
+    int mods = 0;
+
+    if (GetAsyncKeyState(VK_SHIFT) & (1 << 31))
+        mods |= GLFW_MOD_SHIFT;
+    if (GetAsyncKeyState(VK_CONTROL) & (1 << 31))
+        mods |= GLFW_MOD_CTRL;
+    if (GetAsyncKeyState(VK_MENU) & (1 << 31))
+        mods |= GLFW_MOD_ALT;
+
+    return mods;
+}
+
+
+//========================================================================
 // Translates a Windows key to the corresponding GLFW key
 //========================================================================
 
@@ -430,7 +449,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
         {
-            _glfwInputKey(window, translateKey(wParam, lParam), GLFW_PRESS);
+            _glfwInputKey(window, translateKey(wParam, lParam), GLFW_PRESS, getKeyMods());
             break;
         }
 
@@ -446,11 +465,11 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             // Special trick: release both shift keys on SHIFT up event
             if (wParam == VK_SHIFT)
             {
-                _glfwInputKey(window, GLFW_KEY_LEFT_SHIFT, GLFW_RELEASE);
-                _glfwInputKey(window, GLFW_KEY_RIGHT_SHIFT, GLFW_RELEASE);
+                _glfwInputKey(window, GLFW_KEY_LEFT_SHIFT, GLFW_RELEASE, getKeyMods());
+                _glfwInputKey(window, GLFW_KEY_RIGHT_SHIFT, GLFW_RELEASE, getKeyMods());
             }
             else
-                _glfwInputKey(window, translateKey(wParam, lParam), GLFW_RELEASE);
+                _glfwInputKey(window, translateKey(wParam, lParam), GLFW_RELEASE, getKeyMods());
 
             break;
         }
@@ -458,21 +477,21 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
         case WM_LBUTTONDOWN:
         {
             SetCapture(hWnd);
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, getKeyMods());
             return 0;
         }
 
         case WM_RBUTTONDOWN:
         {
             SetCapture(hWnd);
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, getKeyMods());
             return 0;
         }
 
         case WM_MBUTTONDOWN:
         {
             SetCapture(hWnd);
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_PRESS);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_PRESS, getKeyMods());
             return 0;
         }
 
@@ -481,12 +500,12 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             if (HIWORD(wParam) == XBUTTON1)
             {
                 SetCapture(hWnd);
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_4, GLFW_PRESS);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_4, GLFW_PRESS, getKeyMods());
             }
             else if (HIWORD(wParam) == XBUTTON2)
             {
                 SetCapture(hWnd);
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_5, GLFW_PRESS);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_5, GLFW_PRESS, getKeyMods());
             }
 
             return 1;
@@ -495,21 +514,21 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
         case WM_LBUTTONUP:
         {
             ReleaseCapture();
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, getKeyMods());
             return 0;
         }
 
         case WM_RBUTTONUP:
         {
             ReleaseCapture();
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE, getKeyMods());
             return 0;
         }
 
         case WM_MBUTTONUP:
         {
             ReleaseCapture();
-            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_RELEASE);
+            _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_RELEASE, getKeyMods());
             return 0;
         }
 
@@ -518,12 +537,12 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             if (HIWORD(wParam) == XBUTTON1)
             {
                 ReleaseCapture();
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_4, GLFW_RELEASE);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_4, GLFW_RELEASE, getKeyMods());
             }
             else if (HIWORD(wParam) == XBUTTON2)
             {
                 ReleaseCapture();
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_5, GLFW_RELEASE);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_5, GLFW_RELEASE, getKeyMods());
             }
 
             return 1;
@@ -1197,10 +1216,10 @@ void _glfwPlatformPollEvents(void)
         // See if this differs from our belief of what has happened
         // (we only have to check for lost key up events)
         if (!lshift_down && window->key[GLFW_KEY_LEFT_SHIFT] == 1)
-            _glfwInputKey(window, GLFW_KEY_LEFT_SHIFT, GLFW_RELEASE);
+            _glfwInputKey(window, GLFW_KEY_LEFT_SHIFT, GLFW_RELEASE, getKeyMods());
 
         if (!rshift_down && window->key[GLFW_KEY_RIGHT_SHIFT] == 1)
-            _glfwInputKey(window, GLFW_KEY_RIGHT_SHIFT, GLFW_RELEASE);
+            _glfwInputKey(window, GLFW_KEY_RIGHT_SHIFT, GLFW_RELEASE, getKeyMods());
     }
 
     // Did the cursor move in an focused window that has captured the cursor

@@ -47,6 +47,25 @@
 
 
 //========================================================================
+// Translates an X event modifier state mask
+//========================================================================
+
+int translateState(int state)
+{
+    int mods = 0;
+
+    if (state & ShiftMask)
+        mods |= GLFW_MOD_SHIFT;
+    if (state & ControlMask)
+        mods |= GLFW_MOD_CTRL;
+    if (state & Mod1Mask)
+        mods |= GLFW_MOD_ALT;
+
+    return mods;
+}
+
+
+//========================================================================
 // Translates an X Window key to internal coding
 //========================================================================
 
@@ -484,18 +503,25 @@ static void processEvent(XEvent *event)
     {
         case KeyPress:
         {
+            int key, mods;
+
             // A keyboard key was pressed
             window = findWindow(event->xkey.window);
             if (window == NULL)
                 return;
 
-            _glfwInputKey(window, translateKey(event->xkey.keycode), GLFW_PRESS);
+            key = translateKey(event->xkey.keycode);
+            mods = translateState(event->xkey.state);
+
+            _glfwInputKey(window, key, GLFW_PRESS, mods);
             _glfwInputChar(window, translateChar(&event->xkey));
             break;
         }
 
         case KeyRelease:
         {
+            int key, mods;
+
             // A keyboard key was released
             window = findWindow(event->xkey.window);
             if (window == NULL)
@@ -527,23 +553,30 @@ static void processEvent(XEvent *event)
                 }
             }
 
-            _glfwInputKey(window, translateKey(event->xkey.keycode), GLFW_RELEASE);
+            key = translateKey(event->xkey.keycode);
+            mods = translateState(event->xkey.state);
+
+            _glfwInputKey(window, key, GLFW_RELEASE, mods);
             break;
         }
 
         case ButtonPress:
         {
+            int mods;
+
             // A mouse button was pressed or a scrolling event occurred
             window = findWindow(event->xbutton.window);
             if (window == NULL)
                 return;
 
+            mods = translateState(event->xbutton.state);
+
             if (event->xbutton.button == Button1)
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, mods);
             else if (event->xbutton.button == Button2)
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_PRESS);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_MIDDLE, GLFW_PRESS, mods);
             else if (event->xbutton.button == Button3)
-                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS);
+                _glfwInputMouseClick(window, GLFW_MOUSE_BUTTON_RIGHT, GLFW_PRESS, mods);
 
             // XFree86 3.3.2 and later translates mouse wheel up/down into
             // mouse button 4 & 5 presses
@@ -562,28 +595,35 @@ static void processEvent(XEvent *event)
 
         case ButtonRelease:
         {
+            int mods;
+
             // A mouse button was released
             window = findWindow(event->xbutton.window);
             if (window == NULL)
                 return;
 
+            mods = translateState(event->xbutton.state);
+
             if (event->xbutton.button == Button1)
             {
                 _glfwInputMouseClick(window,
                                      GLFW_MOUSE_BUTTON_LEFT,
-                                     GLFW_RELEASE);
+                                     GLFW_RELEASE,
+                                     mods);
             }
             else if (event->xbutton.button == Button2)
             {
                 _glfwInputMouseClick(window,
                                      GLFW_MOUSE_BUTTON_MIDDLE,
-                                     GLFW_RELEASE);
+                                     GLFW_RELEASE,
+                                     mods);
             }
             else if (event->xbutton.button == Button3)
             {
                 _glfwInputMouseClick(window,
                                      GLFW_MOUSE_BUTTON_RIGHT,
-                                     GLFW_RELEASE);
+                                     GLFW_RELEASE,
+                                     mods);
             }
             break;
         }

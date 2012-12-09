@@ -322,10 +322,10 @@ void _glfwInputWindowDamage(_GLFWwindow* window);
 void _glfwInputWindowCloseRequest(_GLFWwindow* window);
 
 // Input event notification (input.c)
-void _glfwInputKey(_GLFWwindow* window, int key, int action);
+void _glfwInputKey(_GLFWwindow* window, int key, int action, int mods);
 void _glfwInputChar(_GLFWwindow* window, int character);
 void _glfwInputScroll(_GLFWwindow* window, double x, double y);
-void _glfwInputMouseClick(_GLFWwindow* window, int button, int action);
+void _glfwInputMouseClick(_GLFWwindow* window, int button, int action, int mods);
 void _glfwInputCursorMotion(_GLFWwindow* window, int x, int y);
 void _glfwInputCursorEnter(_GLFWwindow* window, int entered);
 

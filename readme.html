@@ -294,6 +294,7 @@ version of GLFW.</p>
   <li>Added <code>threads</code> simple multi-threaded rendering test program</li>
   <li>Added <code>glfw3native.h</code> header and platform-specific functions for explicit access to native display, window and context handles</li>
   <li>Added <code>glfwSetGamma</code>, <code>glfwSetGammaRamp</code> and <code>glfwGetGammaRamp</code> functions and <code>GLFWgammaramp</code> type for monitor gamma ramp control</li>
+  <li>Added key modifier parameters to key and mouse button callbacks</li>
   <li>Added window parameter to <code>glfwSwapBuffers</code></li>
   <li>Changed buffer bit depth parameters of <code>glfwOpenWindow</code> to window hints</li>
   <li>Changed <code>glfwOpenWindow</code> and <code>glfwSetWindowTitle</code> to use UTF-8 encoded strings</li>
@@ -939,8 +940,9 @@ their skills.  Special thanks go out to:</p>
 
   <li>Riku Salminen, for the initial implementation of
   <code>glfwShowWindow</code> and <code>glfwHideWindow</code>, for the idea of
-  <code>glfwDefaultWindowHints</code> and for making the X11 event processing
-  able to support multi-threaded rendering</li>
+  <code>glfwDefaultWindowHints</code>, for the naming of the key modifier flags
+  and for making the X11 event processing able to support multi-threaded
+  rendering</li>
 
   <li>Douglas C. Schmidt and Irfan Pyarali, for their excellent article
   <a href="http://www.cs.wustl.edu/~schmidt/win32-cv-1.html">Strategies for Implementing POSIX Condition Variables on Win32</a></li>

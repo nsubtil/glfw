@@ -39,7 +39,7 @@
 static GLFWwindow windows[2];
 static GLboolean closed = GL_FALSE;
 
-static void key_callback(GLFWwindow window, int key, int action)
+static void key_callback(GLFWwindow window, int key, int action, int mods)
 {
     if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE)
         closed = GL_TRUE;

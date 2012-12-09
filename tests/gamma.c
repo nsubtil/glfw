@@ -58,7 +58,7 @@ static int window_close_callback(GLFWwindow window)
     return GL_FALSE;
 }
 
-static void key_callback(GLFWwindow window, int key, int action)
+static void key_callback(GLFWwindow window, int key, int action, int mods)
 {
     if (action != GLFW_PRESS)
         return;

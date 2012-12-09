@@ -81,7 +81,7 @@ static int window_close_callback(GLFWwindow window)
     return GL_TRUE;
 }
 
-static void key_callback(GLFWwindow window, int key, int action)
+static void key_callback(GLFWwindow window, int key, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE)
     {
