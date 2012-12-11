@@ -290,6 +290,7 @@ void _glfwPlatformIconifyWindow(_GLFWwindow* window);
 void _glfwPlatformRestoreWindow(_GLFWwindow* window);
 void _glfwPlatformShowWindow(_GLFWwindow* window);
 void _glfwPlatformHideWindow(_GLFWwindow* window);
+int  _glfwPlatformGetWindowParam(_GLFWwindow* window, int param);
 
 // Event processing
 void _glfwPlatformPollEvents(void);

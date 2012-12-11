@@ -681,20 +681,12 @@ GLFWAPI int glfwGetWindowParam(GLFWwindow handle, int param)
     {
         case GLFW_FOCUSED:
             return window == _glfwLibrary.focusedWindow;
-        case GLFW_ICONIFIED:
-            return window->iconified;
         case GLFW_CLOSE_REQUESTED:
             return window->closeRequested;
         case GLFW_REFRESH_RATE:
             return window->refreshRate;
         case GLFW_RESIZABLE:
             return window->resizable;
-        case GLFW_VISIBLE:
-            return window->visible;
-        case GLFW_POSITION_X:
-            return window->positionX;
-        case GLFW_POSITION_Y:
-            return window->positionY;
         case GLFW_CLIENT_API:
             return window->clientAPI;
         case GLFW_OPENGL_VERSION_MAJOR:
@@ -711,6 +703,15 @@ GLFWAPI int glfwGetWindowParam(GLFWwindow handle, int param)
             return window->glProfile;
         case GLFW_OPENGL_ROBUSTNESS:
             return window->glRobustness;
+    }
+
+    switch (param)
+    {
+        case GLFW_ICONIFIED:
+        case GLFW_VISIBLE:
+        case GLFW_POSITION_X:
+        case GLFW_POSITION_Y:
+            return _glfwPlatformGetWindowParam(window, param);
     }
 
     _glfwSetError(GLFW_INVALID_ENUM, NULL);

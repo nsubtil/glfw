@@ -1138,6 +1138,47 @@ void _glfwPlatformHideWindow(_GLFWwindow* window)
 
 
 //========================================================================
+// Get window parameter
+//========================================================================
+
+int _glfwPlatformGetWindowParam(_GLFWwindow* window, int param)
+{
+    switch (param)
+    {
+        case GLFW_ICONIFIED:
+        {
+            if (IsIconic(window->Win32.handle))
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_VISIBLE:
+        {
+            if (IsWindowVisible(window->Win32.handle))
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_POSITION_X:
+        case GLFW_POSITION_Y:
+        {
+            POINT pos = { 0, 0 };
+            ClientToScreen(window->Win32.handle, &pos);
+
+            if (param == GLFW_POSITION_X)
+                return pos.x;
+            else
+                return pos.y;
+        }
+    }
+
+    return 0;
+}
+
+
+//========================================================================
 // Write back window parameters into GLFW window structure
 //========================================================================
 

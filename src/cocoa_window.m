@@ -1102,6 +1102,48 @@ void _glfwPlatformHideWindow(_GLFWwindow* window)
     _glfwInputWindowVisibility(window, GL_FALSE);
 }
 
+
+//========================================================================
+// Get window parameter
+//========================================================================
+
+int _glfwPlatformGetWindowParam(_GLFWwindow* window, int param)
+{
+    switch (param)
+    {
+        case GLFW_ICONIFIED:
+        {
+            if ([window->NS.object isMiniaturized])
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_VISIBLE:
+        {
+            if ([window->NS.object isVisible])
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_POSITION_X:
+        case GLFW_POSITION_Y:
+        {
+            NSRect contentRect =
+                [window->NS.object contentRectForFrameRect:[window->NS.object frame]];
+
+            if (param == GLFW_POSITION_X)
+                return contentRect.origin.x;
+            else
+                return contentRect.origin.y;
+        }
+    }
+
+    return 0;
+}
+
+
 //========================================================================
 // Write back window parameters into GLFW window structure
 //========================================================================

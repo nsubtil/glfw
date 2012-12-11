@@ -1139,6 +1139,47 @@ void _glfwPlatformHideWindow(_GLFWwindow* window)
 
 
 //========================================================================
+// Get window parameter
+//========================================================================
+
+int _glfwPlatformGetWindowParam(_GLFWwindow* window, int param)
+{
+    XWindowAttributes attribs;
+
+    XGetWindowAttributes(_glfwLibrary.X11.display,
+                        window->X11.handle,
+                        &attribs);
+
+    switch (param)
+    {
+        case GLFW_ICONIFIED:
+        {
+            if (attribs.map_state == IsUnmapped)
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_VISIBLE:
+        {
+            if (attribs.map_state != IsUnmapped)
+                return GL_TRUE;
+
+            return GL_FALSE;
+        }
+
+        case GLFW_POSITION_X:
+            return attribs.x;
+
+        case GLFW_POSITION_Y:
+            return attribs.y;
+    }
+
+    return 0;
+}
+
+
+//========================================================================
 // Read back framebuffer parameters from the context
 //========================================================================
 
