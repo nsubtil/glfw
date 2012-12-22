@@ -252,7 +252,7 @@ GLFWAPI int glfwGetKey(GLFWwindow handle, int key)
     if (key < 0 || key > GLFW_KEY_LAST)
     {
         _glfwSetError(GLFW_INVALID_ENUM,
-                      "glfwGetKey: The specified key is invalid");
+                      "The specified key is invalid");
         return GLFW_RELEASE;
     }
 
@@ -277,7 +277,7 @@ GLFWAPI int glfwGetMouseButton(GLFWwindow handle, int button)
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
     {
         _glfwSetError(GLFW_INVALID_ENUM,
-                      "glfwGetMouseButton: The specified mouse button is invalid");
+                      "The specified mouse button is invalid");
         return GLFW_RELEASE;
     }
 

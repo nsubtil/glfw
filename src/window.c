@@ -237,7 +237,7 @@ GLFWAPI GLFWwindow glfwCreateWindow(int width, int height,
     wndconfig.glForward      = _glfwLibrary.hints.glForward ? GL_TRUE : GL_FALSE;
     wndconfig.glDebug        = _glfwLibrary.hints.glDebug ? GL_TRUE : GL_FALSE;
     wndconfig.glProfile      = _glfwLibrary.hints.glProfile;
-    wndconfig.glRobustness   = _glfwLibrary.hints.glRobustness ? GL_TRUE : GL_FALSE;
+    wndconfig.glRobustness   = _glfwLibrary.hints.glRobustness;
     wndconfig.share          = (_GLFWwindow*) share;
 
     // Check the OpenGL bits of the window config
@@ -249,15 +249,13 @@ GLFWAPI GLFWwindow glfwCreateWindow(int width, int height,
 
     if (mode != GLFW_WINDOWED && mode != GLFW_FULLSCREEN)
     {
-        _glfwSetError(GLFW_INVALID_ENUM,
-                      "glfwCreateWindow: Invalid window mode");
+        _glfwSetError(GLFW_INVALID_ENUM, "Invalid window mode");
         return GL_FALSE;
     }
 
     if (width <= 0 || height <= 0)
     {
-        _glfwSetError(GLFW_INVALID_VALUE,
-                      "glfwCreateWindow: Invalid window size");
+        _glfwSetError(GLFW_INVALID_VALUE, "Invalid window size");
         return GL_FALSE;
     }
 
@@ -437,11 +435,14 @@ GLFWAPI void glfwWindowHint(int target, int hint)
         case GLFW_CLIENT_API:
             _glfwLibrary.hints.clientAPI = hint;
             break;
-        case GLFW_OPENGL_VERSION_MAJOR:
+        case GLFW_CONTEXT_VERSION_MAJOR:
             _glfwLibrary.hints.glMajor = hint;
             break;
-        case GLFW_OPENGL_VERSION_MINOR:
+        case GLFW_CONTEXT_VERSION_MINOR:
             _glfwLibrary.hints.glMinor = hint;
+            break;
+        case GLFW_CONTEXT_ROBUSTNESS:
+            _glfwLibrary.hints.glRobustness = hint;
             break;
         case GLFW_OPENGL_FORWARD_COMPAT:
             _glfwLibrary.hints.glForward = hint;
@@ -451,9 +452,6 @@ GLFWAPI void glfwWindowHint(int target, int hint)
             break;
         case GLFW_OPENGL_PROFILE:
             _glfwLibrary.hints.glProfile = hint;
-            break;
-        case GLFW_OPENGL_ROBUSTNESS:
-            _glfwLibrary.hints.glRobustness = hint;
             break;
         default:
             _glfwSetError(GLFW_INVALID_ENUM, NULL);
@@ -689,20 +687,20 @@ GLFWAPI int glfwGetWindowParam(GLFWwindow handle, int param)
             return window->resizable;
         case GLFW_CLIENT_API:
             return window->clientAPI;
-        case GLFW_OPENGL_VERSION_MAJOR:
+        case GLFW_CONTEXT_VERSION_MAJOR:
             return window->glMajor;
-        case GLFW_OPENGL_VERSION_MINOR:
+        case GLFW_CONTEXT_VERSION_MINOR:
             return window->glMinor;
-        case GLFW_OPENGL_REVISION:
+        case GLFW_CONTEXT_REVISION:
             return window->glRevision;
+        case GLFW_CONTEXT_ROBUSTNESS:
+            return window->glRobustness;
         case GLFW_OPENGL_FORWARD_COMPAT:
             return window->glForward;
         case GLFW_OPENGL_DEBUG_CONTEXT:
             return window->glDebug;
         case GLFW_OPENGL_PROFILE:
             return window->glProfile;
-        case GLFW_OPENGL_ROBUSTNESS:
-            return window->glRobustness;
     }
 
     switch (param)
