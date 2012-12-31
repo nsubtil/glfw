@@ -78,6 +78,7 @@ GLFWAPI HGLRC glfwGetWGLContext(GLFWwindow window);
 
 GLFWAPI id glfwGetCocoaWindow(GLFWwindow window);
 GLFWAPI id glfwGetNSGLContext(GLFWwindow window);
+GLFWAPI GLFWwindow glfwWrapNSGLContext(NSOpenGLContext *context);
 
 #elif defined(GLFW_EXPOSE_NATIVE_X11_GLX)
 

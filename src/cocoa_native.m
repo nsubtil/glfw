@@ -72,3 +72,29 @@ GLFWAPI id glfwGetNSGLContext(GLFWwindow handle)
     return window->NSGL.context;
 }
 
+//========================================================================
+// Wrap a native NSOpenGLContext in a GLFWwindow
+// returns a fake GLFWwindow that can only be used as the share parameter in CreateWindow
+//========================================================================
+
+GLFWAPI GLFWwindow glfwWrapNSGLContext(NSOpenGLContext *context)
+{
+    _GLFWwindow *window;
+
+    if (!_glfwInitialized)
+    {
+        _glfwSetError(GLFW_NOT_INITIALIZED, NULL);
+        return NULL;
+    }
+
+    window = (_GLFWwindow *) calloc(1, sizeof(_GLFWwindow));
+    if (!window)
+    {
+        _glfwSetError(GLFW_OUT_OF_MEMORY, NULL);
+        return NULL;
+    }
+
+    window->NSGL.context = (NSOpenGLContext *)context;
+
+    return window;
+}
